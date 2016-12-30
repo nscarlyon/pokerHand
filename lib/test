@@ -1,0 +1,163 @@
+function findHandRank(hand) {
+  cards = sortMapCards(hand);
+  numberFrequencies = findNumberFrequency(cards);
+  suitFrequencies = findSuitFrequency(cards);
+  return rank();
+} // end of findHandRank
+
+var rank = function () {
+  if(isRoyalFlush()) {
+    return "Royal Flush"
+  } else if (isStraightFlush()) {
+    return "Straight Flush"
+  } else if(isStraight()) {
+    return "Straight";
+  } else if(isFullHouse()) {
+    return "Full House";
+  } else if(isFourOfAKind()) {
+    return "Four of a kind";
+  } else if(isThreeOfAKind()) {
+    return "Three of a kind";
+  } else if(findNumberOfPairs() === 1) {
+    return "Pair";
+  } else if(findNumberOfPairs() === 2) {
+    return "Two Pairs";
+  } else if(isFlush()) {
+    return "Flush";
+  } else {
+    return highestValue();
+  }
+}
+
+  function isRoyalFlush() {
+    var royalFlush = ["a", "j", "k", "q", "10"]
+    var isRoyalFlush = 1;
+
+    cards.forEach(function(card) {
+      var match = royalFlush.indexOf(card.number)
+      if(match == -1) {
+        isRoyalFlush = 0;
+      }
+    })
+    return suitFrequencies.length == 1 && isRoyalFlush == 1
+  }
+
+  function isStraightFlush() {
+    return isStraight() && isFlush();
+  }
+
+  function highestValue() {
+    var highestNumber = cards.reduce(function(card1, card2) {
+      // if((card1 > 0 == false) || (card1.number > 0 == false)) {
+      //
+      // }
+
+      var findMax = Math.max(Number(card1.number || card1), Number(card2.number))
+      return findMax;
+    })
+
+    return "High Value: " + highestNumber;
+  }
+
+  function isFullHouse() {
+    return numberFrequencies.includes(3) && numberFrequencies.includes(2);
+  }
+
+  function isStraight() {
+    var straights = [["2", "3", "4", "5", "a"], ["2", "3", "4", "5", "6"], ["3", "4", "5", "6", "7"], ["4", "5", "6", "7", "8"],
+    ["5", "6", "7", "8", "9"], ["6", "7", "8", "9", "10"], ["7", "8", "9", "j", "10"], ["8", "9", "j", "q", "10"],
+    ["9", "j", "k", "q", "10"], ["a", "j", "k", "q", "10"]]
+    var isStraight = false;
+
+    if(numberFrequencies.length == 5) {
+      straights.forEach(function(straight) {
+        if(cards[0].number == straight[0] && cards[1].number == straight[1] && cards[2].number == straight[2] &&
+          cards[3].number == straight[3] && cards[4].number == straight[4]) {
+          isStraight = true;
+        }
+      })
+    }
+
+    return isStraight;
+  }
+
+  function isFourOfAKind() {
+    return numberFrequencies.includes(4);
+  }
+
+  function isThreeOfAKind() {
+    return numberFrequencies.includes(3);
+  }
+
+  function findNumberOfPairs() {
+    var numberOfPairs = numberFrequencies.filter(findPairs).length;
+    if(numberOfPairs == 1) {
+      return 1;
+    } else if(numberOfPairs == 2) {
+      return 2;
+    }
+  }
+
+  function findPairs(timesOccurred) {
+    if(timesOccurred == 2) {
+      return timesOccurred;
+    }
+  }
+
+  function isFlush() {
+    return suitFrequencies[0] == 5;
+  }
+
+var sortMapCards = function(hand) {
+  var sortedCards = hand.split(" ").sort()
+  var shiftTen = sortedCards.slice(0)
+
+  sortedCards.forEach(function(card, index, array) {
+    if(card[0] == "1") {
+      shiftTen.shift();
+      shiftTen.push(card);
+    }
+  })
+
+  return shiftTen.map(function(card) {
+    if(card[0] === "1") {
+      return {number: card[0] + card[1], suit: card[2]}
+    } else {
+      return {number: card[0], suit: card[1]}
+    }
+  })
+}
+
+var findNumberFrequency = function(cards) {
+  var numberFrequencies = [];
+  var prev;
+
+  cards.forEach(function(card) {
+    if(card.number === prev) {
+      numberFrequencies[numberFrequencies.length - 1]++;
+      prev = card.number;
+    } else {
+      prev = card.number;
+      numberFrequencies.push(1);
+    }
+  })
+
+  return numberFrequencies;
+}
+
+var findSuitFrequency = function(cards) {
+  var suitFrequencies = [];
+  var prev;
+
+  cards.forEach(function(card) {
+    if(card.suit === prev) {
+      suitFrequencies[suitFrequencies.length - 1]++;
+      prev = card.suit;
+    } else {
+      prev = card.suit;
+      suitFrequencies.push(1);
+    }
+  })
+
+  return suitFrequencies;
+}
